@@ -121,9 +121,28 @@ class ScopusExtract:
             print("Generic error: %s" % (e))
             return   
 
+    def author_name(self, firstname, surname):
+        endpoint = 'https://api.elsevier.com/content/search/author?query=AUTHFIRST(%s)+AND+AUTHLASTNAME(%s)' % (
+            firstname,
+            surname
+        )
+        headers = {
+                'Accept': 'application/json',
+                'X-ELS-APIKey': self.__api_key
+            }
+        try:
+            response = requests.get(endpoint, headers=headers)
+            response.raise_for_status()
+            json_data = json.loads(response.text)
+            data = json_data["search-results"]["entry"]
+            return data
+        except Exception as e:
+                print("Generic error: %s" % (e))
+                return
 
-    def documents(self):
-        documents_ids = self.__documents_ids()
+
+    def documents(self, author_id):
+        documents_ids = self.__documents_ids(author_id)
         documents = list()
 
         for document_id in documents_ids:
@@ -144,10 +163,10 @@ class ScopusExtract:
                 return
         return documents
 
-    def __documents_ids(self) -> dict():
+    def __documents_ids(self, author_id) -> dict():
         """
         """
-        endpoint = f"http://api.elsevier.com/content/search/scopus?query=AU-ID({self.__author_id})&field=dc:identifier&count=100"
+        endpoint = f"http://api.elsevier.com/content/search/scopus?query=AU-ID({author_id})&field=dc:identifier&count=100"
         headers = {
             'Accept': 'application/json',
             'X-ELS-APIKey': self.__api_key

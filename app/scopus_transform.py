@@ -23,7 +23,7 @@ class ScopusTransform:
         return self.__instance
     
 
-    def documents(self, documents_extracted):
+    def documents(self, documents_extracted) -> list:
         documents_transformed = list()
         for document_extracted in documents_extracted:
             document_transformed = {
@@ -154,3 +154,58 @@ class ScopusTransform:
         """
         return int( document_extracted['abstracts-retrieval-response']['coredata'].get('openaccess') )
     
+
+    def authors(self, authors_extracted) -> list:
+        authors_transformed = list()
+        for author_extracted in authors_extracted:
+            authors_transformed.append({
+                "id": author_extracted['dc:identifier'].split(':')[-1],
+                "author": self.__get_author_name(author_extracted['preferred-name']),
+                "affiliation": self.__get_affiliation(author_extracted['affiliation-current']),
+                "subject_area": self.__get_subject_areas(author_extracted['subject-area'])
+            })
+        return authors_transformed
+
+    def __get_author_name(self, author_name_extracted) -> str:
+        """Transform the author name.
+
+        Args:
+            author_name_extracted (dict): data structure with the name information.
+
+        Returns:
+            (str) the complete name (first and family name)
+        """
+        return '%s %s' % (
+            author_name_extracted['given-name'],
+            author_name_extracted['surname']
+        )
+    
+    def __get_affiliation(self, affiliation_extracted) -> dict:
+        """Transform the affiliation
+
+        Args:
+            affiliation_extracted (dict): data structure with the affiliation information.
+
+        Returns:
+            (dict) a data structure with the affiliation information
+        """
+        return {
+            "id": affiliation_extracted['affiliation-id'],
+            "institute": affiliation_extracted['affiliation-name'],
+            "city": affiliation_extracted['affiliation-city'],
+            "country": affiliation_extracted['affiliation-country']
+        }
+
+    def __get_subject_areas(self, subject_areas_extracted) -> list:
+        """Transform the subject areas
+
+        Args:
+            subject_areas_extracted (dict): data structure with the subject areas information.
+
+        Returns:
+            (list) a list of subject areas
+        """
+        subject_area_transformed = list()
+        for subject_area_extracted in subject_areas_extracted:
+                subject_area_transformed.append( subject_area_extracted["$"] )
+        return subject_area_transformed

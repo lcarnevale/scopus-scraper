@@ -17,10 +17,12 @@ def main():
     scopus_load = ScopusLoad() \
         .build()
     
-    documents_extracted = scopus_extract.documents()
-    print(documents_extracted[2])
+    authors_extracted = scopus_extract.author_name("Lorenzo", "Carnevale")
+    authors_transformed = scopus_transform.authors(authors_extracted)
+    documents_extracted = scopus_extract.documents('57195963279')
+    print(documents_extracted[0])
     documents_transformed = scopus_transform.documents(documents_extracted)
-    print(documents_transformed[2])
+    print(documents_transformed[0])
     scopus_load.load()
 
 if __name__ == "__main__":
